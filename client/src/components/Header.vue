@@ -1,34 +1,31 @@
 <template>
-  <div class="header">
-    <header>
-      <h1>{{msg}}</h1>
-    </header>
-  </div>
+  <a-layout-header class="header">
+    <h1>{{msg}}</h1>
+  </a-layout-header>
 </template>
 
 <script>
 export default {
-  name: 'Header',
-  data () {
+  name: "Header",
+  data() {
     return {
-      msg: 'Language identification with Neural Networks'
-    }
+      msg: "Language identification with Neural Networks"
+    };
   }
-}
+};
 </script>
 
 <style scoped>
-h1, h2 {
+h1 {
   font-weight: normal;
+  text-align: center;
+  color: #ffffff;
+  font-family: "Snell Roundhand", cursive;
 }
 
-header {
+.header {
   position: fixed;
-  top: 0;
+  z-index: 1;
   width: 100%;
-  min-height: 90px;
-  border-bottom: 1px solid #42b983;
-  text-align: center;
-  background: #ffffff;
 }
 </style>
