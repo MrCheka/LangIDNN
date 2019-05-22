@@ -28,4 +28,10 @@ h1 {
   z-index: 1;
   width: 100%;
 }
+
+@media (max-width: 700px) {
+  .header {
+    height: 128px;
+  }
+}
 </style>

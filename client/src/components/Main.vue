@@ -1,5 +1,5 @@
 <template>
-  <a-layout-content :style="{ padding: '0 50px', marginTop: '64px' }">
+  <a-layout-content class="content">
     <a-collapse :bordered="false">
       <a-collapse-panel v-if="showLangs" header="Поддерживаемые языки" key="1" :style="customStyle">
         <p>{{langsStr}}</p>
@@ -16,6 +16,7 @@
       type="primary"
       :style="buttonStyle"
     >Определить!</a-button>
+    <h1 v-if="showResult">Результат - {{resultLang}}. Точность определения - {{acc}}%.</h1>
   </a-layout-content>
 </template>
 
@@ -26,7 +27,7 @@ export default {
   name: "Main",
   data() {
     return {
-      endpoint: "http://127.0.0.1:5000",
+      endpoint: "https://c7b26a85.ngrok.io",
       langs: null,
       langsStr: null,
       showLangs: false,
@@ -35,7 +36,7 @@ export default {
       resultLang: null,
       acc: null,
       customStyle:
-        "background: #f7f7f7;border-radius: 4px;margin-bottom: 24px;margin-top: 10px;border: 0;overflow: hidden; text-align: left;",
+        "background: #f7f7f7;border-radius: 4px;margin-bottom: 24px;margin-top: 10px;border: 0;overflow: hidden; text-align: justify;",
       buttonStyle: "width: 100%; margin-top: 10px;",
       loadingButton: false
     };
@@ -55,12 +56,11 @@ export default {
         .then(response => {
           this.showLangs = true;
           this.langs = response.data.langs;
+          console.log(this.langs.length);
           var tmp = [];
-          this.langs.forEach(row => {
-            Object.keys(row).forEach(el => {
-              tmp.push(row[el]);
-            });
-          });
+          for (var lang in this.langs) {
+            tmp.push(this.langs[lang]);
+          }
           this.langsStr = Array.join(tmp, ", ");
         })
         .catch(error => {
@@ -81,17 +81,27 @@ export default {
           this.showResult = true;
           this.resultLang = response.data.lang;
           this.acc = response.data.acc;
+          this.loadingButton = false;
         })
         .catch(error => {
           console.log("---error---");
           console.log(error);
+          this.loadingButton = false;
         });
-
-      this.loadingButton = false;
     }
   }
 };
 </script>
 
 <style scoped>
+.content {
+  margin-top: 64px;
+  padding: 0 50px 0 50px;
+}
+
+@media (max-width: 700px) {
+  .content {
+    margin-top: 128px;
+  }
+}
 </style>
