@@ -27,7 +27,7 @@ export default {
   name: "Main",
   data() {
     return {
-      endpoint: "https://c7b26a85.ngrok.io",
+      endpoint: "https://dc6b499f.ngrok.io",
       langs: null,
       langsStr: null,
       showLangs: false,
