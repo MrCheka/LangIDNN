@@ -88,3 +88,101 @@ class NNHelper(object):
         logging.info('Тестирование закончено за {0} секунд'.format(str(int(time.time() - start))))
 
         return corr
+
+    def train(self):
+        self.train_set.skip_n_lines(self.params.get('trained_lines'))
+
+        dev = Dataset(self.params, os.path.join('data', self.params.get('corpus_name'), 'dev'), os.path.join('data', self.params.get('corpus_name'), 'train'))
+        dev.prepare_data(self.params.get('min_count'))
+        start = time.time()
+        cycle_time = time.time()
+        logging.info('Процесс обучения запущен')
+        stop = False
+        loss_per_epoch = []
+        accuracy_per_epoch = []
+
+        while not stop:
+            self.params.params['step'] += 1
+            batch_xs, batch_ys, lengths = self.train_set.get_batch()
+            l, _ = self.model.run(self.session, batch_xs, batch_ys, lengths, self.params.get('dropout'))
+            loss_per_epoch.append(l)
+
+            stop = self.check_stopfile('STOP_IMMEDIATELY')
+
+            if time.strftime('%H') == self.params.get('time_stop'):
+                stop = True
+
+            if self.params.get('step') % self.params.get('steps_per_checkpoint') == 0 or stop:
+                c_time = time.time()
+                corr = [0, 0]
+
+                while not dev.is_finished():
+                    dev_batch_xs, dev_batch_ys, lengths = dev.get_batch()
+
+                    dropout = 1
+                    _, out = self.model.run(self.session, dev_batch_xs, dev_batch_ys, lengths, dropout)
+                    corr = np.sum([corr, out], axis=0)
+
+                result = (corr[0] / corr[1]) * 100
+                accuracy_per_epoch.append(float(corr[0]) / float(corr[1]))
+
+                self.params.params['trained_lines'] = self.train_set.get_trained_lines()
+                self.model.save(self.session, self.params.get('step'), result)
+
+                print('''Итерация: {0},
+                Точность: {1}% {2},
+                Времени на шаг: {3} секунд
+                Время обучения: {4} минут
+                Время: {5}'''.format(self.paramsget('step') * self.params.get('batch_size'),
+                                     result,
+                                     corr,
+                                     (c_time - cycle_time) / self.params.get('steps_per_checkpoint'),
+                                     int((time.time() - start) / 60), time.strftime('%H:%M:%S')))
+
+                cycle_time = time.time()
+
+                stop = stop or self.check_stopfile('STOP_MODEL')
+                if self.params.get('step') >= self.params.get('max_iters'):
+                    stop = True
+
+            if self.train_set.is_finished():
+                avg_loss = np.mean(loss_per_epoch)
+                avg_test_accuracy = np.mean(accuracy_per_epoch)
+
+                summ = self.sess.run(self.model.performance_summaries, feed_dict={self.model.tf_loss_ph: avg_loss,
+                                                                                  self.model.tf_accuracy_ph: avg_test_accuracy})
+                self.model.sum_writer.add_summary(summ, self.params.get('epochs'))
+
+                loss_per_epoch.clear()
+                accuracy_per_epoch.clear()
+
+                self.params.params["epochs"] += 1
+                logging.info("Эпоха {0} начата.".format(self.params.get('epochs')))
+                self.train_set.restart()
+
+        print("Обучение закончено за " + str(int(time.time() - start)) + " секунд")
+
+
+    def check_stopfile(self, filename):
+        stop = False
+        with open(filename, mode="r") as stp:
+            for line in stp:
+                if line.strip() == self.params.params["corpus_name"]:
+                    logging.info("Stopping training on command from stopfile.")
+
+                    stop = True
+                    break
+
+        if stop:
+            # remove command from file
+            f = open(filename, "r")
+            lines = f.readlines()
+            f.close()
+
+            f = open(filename, "w")
+            for line in lines:
+                if line.strip() != self.params.params["corpus_name"]:
+                    f.write(line)
+            f.close()
+
+        return stop
