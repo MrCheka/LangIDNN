@@ -129,7 +129,7 @@ class Model(IModel):
     def eval(self, session, inputs, sentence_lengths, langs_mask=None):
         input_feed = self.feed(inputs, sentence_lengths, 1)
 
-        outs = session.run(self.out, input_feed)
+        outs = session.run(self.probs, input_feed)
 
         result = np.zeros((self.max_length, self.batch_size), dtype=np.int)
         for j in range(self.batch_size):
