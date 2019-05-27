@@ -27,7 +27,7 @@ export default {
   name: "Main",
   data() {
     return {
-      endpoint: "https://dc6b499f.ngrok.io",
+      endpoint: "https://dd6d4513.ngrok.io",
       langs: null,
       langsStr: null,
       showLangs: false,
@@ -56,7 +56,6 @@ export default {
         .then(response => {
           this.showLangs = true;
           this.langs = response.data.langs;
-          console.log(this.langs.length);
           var tmp = [];
           for (var lang in this.langs) {
             tmp.push(this.langs[lang]);

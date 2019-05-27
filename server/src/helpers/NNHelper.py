@@ -69,7 +69,7 @@ class NNHelper(object):
         if total > 0:
             acc = float(guesses[best]) / float(total)
 
-        return datafile.get_target_name(best, type='name'), acc
+        return self.langs[datafile.get_target_name(best, type='orig')], acc
 
     def test(self, dataset):
         datafile = Dataset(self.params, os.path.join('data', dataset, 'test'), os.path.join('data', self.params.get('corpus_name'), 'train'))
