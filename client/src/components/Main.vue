@@ -50,7 +50,7 @@ export default {
   name: "Main",
   data() {
     return {
-      endpoint: "http://localhost:8888",
+      endpoint: "https://8d715e63.ngrok.io",
       langs: null,
       langsStr: null,
       showLangs: false,
@@ -109,7 +109,7 @@ export default {
           this.result = "";
 
           if (this.multi == "true")
-            this.multiResult = "Найдено языков - " + response.data.count + "\n";
+            this.multiResult = "Найдено языков - " + response.data.count;
           console.log(response.data);
           for (var i = 0; i < response.data.result.length; i++) {
             this.result += "Язык - " + response.data.result[i].lang;
