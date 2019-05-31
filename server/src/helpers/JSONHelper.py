@@ -1,33 +1,37 @@
-from src.requests.DetectLangRequest import DetectLangRequest
-from src.responses.DetectLangResponse import DetectLangResponse
+from src.requests.DetectLangsRequest import DetectLangsRequest
+from src.responses.DetectLangsResponse import DetectLangsResponse
 from src.responses.GetLangsResponse import GetLangsResponse
 
 class JSONHelper:
     @staticmethod
-    def serializeDetectLangRequest(obj):
+    def serializeDetectLangsRequest(obj):
         return {
-            'text': obj.text
+            'text': obj.text,
+            'multi': obj.multi,
+            'count': obj.count
         }
 
     @staticmethod
-    def deserializeDetectLangRequest(dict):
+    def deserializeDetectLangsRequest(dict):
         text = dict['text']
+        multi = dict['multi']
+        count = dict['count']
 
-        return DetectLangRequest(text)
+        return DetectLangsRequest(text, multi, count)
 
     @staticmethod
-    def serializeDetectLangResponse(obj):
+    def serializeDetectLangsResponse(obj):
         return {
-            'lang': obj.lang,
-            'acc': obj.acc
+            'count': obj.count,
+            'result': obj.result
         }
 
     @staticmethod
-    def deserializeDetectLangResponse(dict):
-        lang = dict['lang']
-        acc = dict['acc']
+    def deserializeDetectLangsResponse(dict):
+        result = dict['result']
+        count = dict['count']
 
-        return DetectLangResponse(lang, acc)
+        return DetectLangsResponse(count, result)
 
     @staticmethod
     def serializeGetLangsResponse(obj):

@@ -4,7 +4,7 @@ from flask import jsonify
 from flask_cors import CORS
 from src.helpers.NNHelper import NNHelper
 from src.responses.GetLangsResponse import GetLangsResponse
-from src.responses.DetectLangResponse import DetectLangResponse
+from src.responses.DetectLangsResponse import DetectLangsResponse
 from src.helpers.JSONHelper import JSONHelper
 import logging
 import json
@@ -16,7 +16,7 @@ class Controller:
         self.app = Flask(__name__)
         CORS(self.app)
         self.app.add_url_rule('/getLangs', view_func=self.get_langs)
-        self.app.add_url_rule('/detectLang', methods=['POST'], view_func=self.detect_lang)
+        self.app.add_url_rule('/detectLangs', methods=['POST'], view_func=self.detect_langs)
 
         self.helper = NNHelper(sess, model)
 
@@ -29,11 +29,22 @@ class Controller:
     def get_langs(self):
         return json.dumps(self.get_langs_response, default=JSONHelper.serializeGetLangsResponse)
 
-    def detect_lang(self):
-        detect_lang_request = json.loads(request.data, object_hook=JSONHelper.deserializeDetectLangRequest)
+    def detect_langs(self):
+        detect_langs_request = json.loads(request.data, object_hook=JSONHelper.deserializeDetectLangsRequest)
+        print(detect_langs_request.text)
+        if detect_langs_request.multi:
+            count = int(detect_langs_request.count)
+        else:
+            count = 1
 
-        lang, acc = self.helper.detect_lang(detect_lang_request.text)
+        langs = []
 
-        detect_lang_response = DetectLangResponse(lang, round(acc * 100, 2))
+        result = self.helper.detect_langs(detect_langs_request.text, count)
 
-        return json.dumps(detect_lang_response, default=JSONHelper.serializeDetectLangResponse)
+        for key, value in result.items():
+            langs.append({'lang':key, 'acc': round(value*100, 2)})
+
+        detect_langs_response = DetectLangsResponse(len(langs), langs)
+
+        return json.dumps(detect_langs_response, default=JSONHelper.serializeDetectLangsResponse)
+

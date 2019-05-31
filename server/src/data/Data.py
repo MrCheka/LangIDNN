@@ -9,8 +9,7 @@ from src.vocab.Vocabulary import Vocabulary
 
 
 class Data(object):
-    def __init__(self, original_filename, vocabulary_path, params=None,
-                 use_eol=False, text_to_eval=None):
+    def __init__(self, original_filename, vocabulary_path, params=None, text_to_eval=None):
         self.prepared_data = False
         self.original_filename = original_filename
         self.encoding = 'utf-8'
@@ -23,7 +22,6 @@ class Data(object):
         self.batch_number = 0
         self.skip_lines = 0
         self.line_num = 0
-        self.use_eol = use_eol
         self.file_finished = False
         self.max_length = params.params.get("max_length")
         self.unicode_normalization = params.params.get("unicode_normalization")

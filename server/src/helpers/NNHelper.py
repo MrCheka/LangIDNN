@@ -44,6 +44,46 @@ class NNHelper(object):
 
         print('Модель подготовлена за {0} секунд'.format(str(int(time.time() - start))))
 
+    def detect_langs(self, text, count):
+        datafile = Dataset(self.params, None, os.path.join('data', self.params.get('corpus_name'), 'train'), text_to_eval=text)
+
+        guesses = np.zeros(self.train_set.vocab_size()[1], np.int)
+        total = 0
+        while not datafile.is_finished():
+            batch_xs, _, lengths = datafile.get_batch()
+
+            outs = self.model.eval(self.session, batch_xs, lengths)
+
+            for j in range(len(outs[0])):
+                for i in range(len(outs)):
+                    max = outs[i][j]
+
+                    if batch_xs[i][j] == datafile.trg_vocab.PAD_ID:
+                        break
+
+                    guesses[max] += 1
+
+                    total += 1
+
+        result = {}
+
+        for i in range(count):
+            if all(item == 0 for item in guesses):
+                break
+
+            best = np.argmax(guesses)
+
+            acc = 0
+            if total > 0:
+                acc = float(guesses[best]) / float(total)
+
+            lang = self.langs[datafile.get_target_name(best, type='orig')]
+            guesses[best] = 0
+
+            result[lang] = acc
+
+        return result
+
     def detect_lang(self, text):
         datafile = Dataset(self.params, None, os.path.join('data', self.params.get('corpus_name'), 'train'), text_to_eval=text)
 
