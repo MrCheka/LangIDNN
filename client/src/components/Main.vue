@@ -50,7 +50,7 @@ export default {
   name: "Main",
   data() {
     return {
-      endpoint: "https://8d715e63.ngrok.io",
+      endpoint: "http://127.0.0.1:8888",
       langs: null,
       langsStr: null,
       showLangs: false,
